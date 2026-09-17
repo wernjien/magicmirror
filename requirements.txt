@@ -1,0 +1,9 @@
+# mediapipe must stay below 1.0 — the newer "Tasks" API hard-crashes on some
+# macOS versions (a Metal-service bug in Google's compiled binary, not fixable
+# from application code). 0.10.14 uses the legacy `mediapipe.solutions` API
+# instead, which is CPU-only and stable. Needs Python <= 3.13 (no 3.14 wheel).
+mediapipe==0.10.14
+opencv-python-headless
+numpy
+Pillow
+imagehash
