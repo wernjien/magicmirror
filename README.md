@@ -62,16 +62,18 @@ python3 main.py /path/to/photos
 ```
 
 By default (`--layout ugly`), shortlisted photos stay exactly where they
-are and eliminated photos are moved into `/path/to/photos/ugly/`, alongside
-`score.csv`.
+are and eliminated photos are moved into `/path/to/photos/ugly/`.
+`score.csv` always stays in the input directory.
 
 ### File arrangement (`--layout`)
 
-| Layout | Shortlisted photos | Eliminated photos | `score.csv` |
-|---|---|---|---|
-| `ugly` (default) | stay in place | moved to `ugly/` | in `ugly/` |
-| `beauty` | moved to `beauty/` | stay in place | in `beauty/` |
-| `split` | moved to `beauty/` | moved to `ugly/` | in the input directory |
+| Layout | Shortlisted photos | Eliminated photos |
+|---|---|---|
+| `ugly` (default) | stay in place | moved to `ugly/` |
+| `beauty` | moved to `beauty/` | stay in place |
+| `split` | moved to `beauty/` | moved to `ugly/` |
+
+`score.csv` is always written to the input directory, regardless of `--layout`.
 
 Photos are **moved**, not copied — pick `--dry-run` first if you want to
 check the results before anything is relocated. Pass `--link` to symlink
@@ -100,7 +102,7 @@ skipped for this reason.
 | `--ugly-dir` | `<input_dir>/ugly` | Where eliminated photos go |
 | `--beauty-dir` | `<input_dir>/beauty` | Where shortlisted photos go |
 | `--link` | off | Symlink into place instead of moving the originals |
-| `--report` | depends on `--layout` | Where to write `score.csv` |
+| `--report` | `<input_dir>/score.csv` | Where to write `score.csv` |
 | `--skip-singletons` | off | Leave images with no similar neighbors untouched instead of shortlisting them |
 | `--top-n` | off | Only shortlist the N highest-scoring winners across all groups |
 | `--top-percent` | off | Only shortlist the top X% highest-scoring winners across all groups (0-100, rounded up, minimum 1) |

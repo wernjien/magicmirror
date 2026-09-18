@@ -400,10 +400,10 @@ def main():
     parser.add_argument(
         "--layout", choices=["ugly", "beauty", "split"], default="ugly",
         help=(
-            "How to arrange photos after scoring (default: ugly). "
-            "ugly = move eliminated photos + score.csv into an 'ugly' subfolder, shortlisted photos stay put; "
-            "beauty = move shortlisted photos + score.csv into a 'beauty' subfolder, eliminated photos stay put; "
-            "split = move shortlisted into 'beauty' and eliminated into 'ugly', score.csv stays in the input directory"
+            "How to arrange photos after scoring (default: ugly). score.csv always stays in the input directory. "
+            "ugly = move eliminated photos into an 'ugly' subfolder, shortlisted photos stay put; "
+            "beauty = move shortlisted photos into a 'beauty' subfolder, eliminated photos stay put; "
+            "split = move shortlisted into 'beauty' and eliminated into 'ugly'"
         ),
     )
     parser.add_argument("--ugly-dir", type=Path, default=None, help="Where eliminated photos go (default: <input_dir>/ugly)")
@@ -423,14 +423,7 @@ def main():
 
     ugly_dir = args.ugly_dir or (input_dir / "ugly")
     beauty_dir = args.beauty_dir or (input_dir / "beauty")
-    if args.report is not None:
-        report_path = args.report
-    elif args.layout == "ugly":
-        report_path = ugly_dir / "score.csv"
-    elif args.layout == "beauty":
-        report_path = beauty_dir / "score.csv"
-    else:
-        report_path = input_dir / "score.csv"
+    report_path = args.report if args.report is not None else input_dir / "score.csv"
 
     paths = list(iter_images(input_dir, args.recursive))
     # Don't re-ingest photos a previous run already relocated.
@@ -527,12 +520,17 @@ def main():
             src = records[i].path
             dest = dest_root / src.relative_to(input_dir)
             dest.parent.mkdir(parents=True, exist_ok=True)
-            if args.link:
-                if dest.exists() or dest.is_symlink():
-                    dest.unlink()
-                dest.symlink_to(src.resolve())
-            else:
-                shutil.move(str(src), str(dest))
+            paths = [(src, dest)]
+            sidecar_src = src.with_suffix(".txt")
+            if sidecar_src.exists():
+                paths.append((sidecar_src, dest.with_suffix(".txt")))
+            for s, d in paths:
+                if args.link:
+                    if d.exists() or d.is_symlink():
+                        d.unlink()
+                    d.symlink_to(s.resolve())
+                else:
+                    shutil.move(str(s), str(d))
 
     if not args.dry_run:
         if args.layout in ("ugly", "split"):
